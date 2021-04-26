@@ -1,5 +1,5 @@
 .result-image {
-  max-width: 640px; 
+  max-width: 100%; 
   display: block; 
   margin-left: auto; 
   margin-right: auto;
