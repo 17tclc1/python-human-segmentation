@@ -1,0 +1,159 @@
+{% extends './layout.html' %}
+{% block content %}
+<div class="container">
+  <div class="row p-2">
+    <div class="col-md-6 border">
+      <div>
+        <img id="attendance-image" src="./static/img/last_taken/lastImg.jpg"
+          onerror="this.onerror=null; this.src='./static/img/last_taken/null.jpg'" class="card-img p-2 result-image">
+      </div>
+    </div>
+    <div class="col-md-6 border p-0">
+        <div id="info-section" class="border-bottom p-2 m-0 h-100">
+          <h5 class="card-title font-weight-bold">Kết quả ảnh từ thu được từ camera</h5>
+          <p class="card-text font-weight-bold">Thông tin khuôn mặt vừa điểm danh:</p>
+          <p>Kết quả thực hiện: <span id="current-attendance-status" class="bg-primary font-weight-bold"></span></p>
+          <p>User ID: <span id="current-attendance-id"></span> </p>
+          <p>User Name: <span id="current-attendance-name"></span></p>
+        </div>
+        <div id="confirmation-section" class="border-bottom p-2 m-0 d-none">
+          <p>Vui lòng xác nhận nếu hệ thống đã nhận diện đúng</p>
+          <p id="confirmation-status" class="text-danger"></p>
+          <button id="confirm-button" class="btn btn-primary">Xác nhận</button>
+        </div>
+        <div id="pending-section" class="p-2 m-0 d-none">
+          <p>Trường hợp hệ thống bị sai nhiều lần vui lòng chọn tên để giáo viên kiểm tra trực tiếp ( Hệ thống sẽ lấy ảnh vừa chụp )</p>
+          <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#select-list">
+            Yêu cầu xác nhận
+          </button>
+          <!-- Modal -->
+          <div class="modal fade" id="select-list" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="confirmModalLabel">Hãy lựa chọn tên của bạn: </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <p>Sau khi lựa chọn, bạn sẽ được thêm vào danh sách chờ đợi điểm danh trực tiếp của giáo viên</p>
+                  <div class="form-group">
+                    <label for="select-option" class="font-weight-bold">List các sinh viên trong lớp</label>
+                    <select class="form-control" id="select-option" name="newUser">
+                      {% for user in allUsers %}
+                      <option value="{{ user.id }}">{{ user.id }} - {{ user.name }}</option>
+                      {%endfor%}
+                    </select>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <p id="pending-status" class="text-danger"></p>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                  <button type="submit"id="confirm-pending-button" class="btn btn-primary">Xác nhận</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+  </div>
+  <div class="row p-2">
+    <div class="col-md-12 mt-2 mb-2 border">
+      <div class="card-body">
+        <h5 class="card-title">Điểm danh:</h5>
+        <p class="card-text">Vui lòng nhìn thẳng vào camera và nhấn nút chụp</p>
+        <button class="btn btn-primary" id="check-up-button">Tiến hành</button>
+        <p>Các lưu ý khi điểm danh:</p>
+        <ul>
+          <li>Khung giờ điểm danh: 6 giờ sáng - 7 giờ 15 sáng</li>
+          <li>Lần lượt điểm danh một người</li>
+          <li>Cởi kính trước khi điểm danh</li>
+          <li>Tóc tai gọn gàng</li>
+          <li>Nhìn thẳng vào camera và cách khoảng 20-30cm</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+  $('#check-up-button').click(function () {
+    $('#current-attendance-status').text("Đang xử lí")
+    $(this).prop('disabled', true);
+    $.ajax({
+      url: `http://${server}:5000/start-check-up`,
+      type: 'post',
+      success: function(data) {
+        $('#check-up-button').prop('disabled', false);
+        $('#current-attendance-id').text("");
+        $('#current-attendance-name').text("");
+        $('#attendance-image').attr('src', './static/img/last_taken/lastImg.jpg#'+ new Date().getTime());
+        if(data.status == "ok") {
+          if(data.id != 0 && data.name != 'unknown') {
+            // Result
+            $('#current-attendance-status').text("Thành công");
+            $('#current-attendance-id').text(data.id);
+            $('#current-attendance-name').text(data.name);
+            // Styling
+            if($("#info-section").hasClass("h-100")) {
+              $("#info-section").removeClass("h-100");
+            }
+            if($("#confirmation-section").hasClass("d-none")) {
+              $("#confirmation-section").removeClass("d-none");
+            }
+            if($("#pending-section").hasClass("d-none")) {
+              $("#pending-section").removeClass("d-none");
+            }
+          } 
+          else {
+            // Result
+            $('#current-attendance-status').text("Thành công");
+            $('#current-attendance-id').text("Không thể xác định được");
+            $('#current-attendance-name').text("Không thể xác định được");
+            // Styling
+            if($("#info-section").hasClass("h-100")) {
+              $("#info-section").removeClass("h-100");
+            }
+            if(!$("#confirmation-section").hasClass("d-none")) {
+              $("#confirmation-section").addClass("d-none");
+            }
+            if($("#pending-section").hasClass("d-none")) {
+              $("#pending-section").removeClass("d-none");
+            }
+          }
+        } 
+        else if(data.status == "failed") {
+          // Result
+          $('#current-attendance-status').text("Lỗi hệ thống, vui lòng thử lại");
+          // Styling
+          if($("#info-section").hasClass("h-100")) {
+              $("#info-section").removeClass("h-100");
+          }
+          if(!$("#confirmation-section").hasClass("d-none")) {
+            $("#confirmation-section").addClass("d-none");
+          }
+          if($("#pending-section").hasClass("d-none")) {
+            $("#pending-section").removeClass("d-none");
+          }
+        } 
+        else if(data.status == "duplicate") {
+          // Result
+          $('#current-attendance-status').text("Phát hiện nhiều hơn một khuôn mặt,vui lòng thử lại");
+          // Styling
+          if(!$("#info-section").hasClass("h-100")) {
+              $("#info-section").addClass("h-100");
+          }
+          if(!$("#confirmation-section").hasClass("d-none")) {
+              $("#confirmation-section").addClass("d-none");
+          }
+          if(!$("#pending-section").hasClass("d-none")) {
+            $("#pending-section").addClass("d-none");
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

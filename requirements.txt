@@ -1,0 +1,12 @@
+flask
+flask_jwt_extended
+flask_cors
+python_jwt
+gcloud
+sseclient
+Crypto
+pycryptodome
+requests_toolbelt
+opencv-python
+slugify
+imutils
