@@ -80,11 +80,14 @@ def newest_image():
   imgs = []
   
   for f in os.listdir(pathSave):
-      ext = os.path.splitext(f)[0]
-      imgs.append(ext)
+      file_name = os.path.splitext(f)[0]
+      imgs.append(file_name)
   imgs.sort(reverse=True)
   
-  shit = imgs[0] + '.jpg'
-  shitty = 'static/img/taken/' + shit
-  print(shitty)
-  return shitty
+  if len(imgs) == 0:
+    return 'static/img/last_taken/null.jpg'
+  
+  img_with_ext = imgs[0] + '.jpg'
+  img_path = 'static/img/taken/' + img_with_ext
+  
+  return img_path
