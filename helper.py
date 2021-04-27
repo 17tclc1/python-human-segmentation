@@ -9,6 +9,13 @@ import glob
 import shutil
 from slugify import slugify
 import base64
+
+import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+import tensorflow as tf
+import numpy as np
+import cv2
+
 # path
 path_faceCascade = cv2.CascadeClassifier('./training/face_detection_classifier/intel_frontal_face_classifier.xml')
 path_embedding_model = './training/openface_nn4.small2.v1.t7'
