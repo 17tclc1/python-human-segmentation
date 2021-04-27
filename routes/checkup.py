@@ -1,9 +1,10 @@
 import os
 from helper import *
 from datetime import datetime
+from pathlib import Path
 
 checkup = Blueprint('checkup', __name__)
-BASE_DIR = 'E:\Study\Sem 8\python-human-segmentation'
+BASE_DIR = Path(__file__).resolve().parent.parent
 pathSave = os.path.join(BASE_DIR, 'static', 'img', 'taken')
 
 @checkup.route('/')
