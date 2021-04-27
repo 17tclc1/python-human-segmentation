@@ -1,10 +1,16 @@
+import os
 from helper import *
+from datetime import datetime
+
 checkup = Blueprint('checkup', __name__)
-pathSave = "D:\Projects\python-human-segmentation\static\img\last_taken"
+BASE_DIR = 'E:\Study\Sem 8\python-human-segmentation'
+pathSave = os.path.join(BASE_DIR, 'static', 'img', 'taken')
 
 @checkup.route('/')
 def index():
-  return render_template('./partials/index.html', server=server)
+  img = newest_image()
+  return render_template('./partials/index.html', server=server, img=img)
+
 @checkup.route('/upload', methods=['POST'])
 def startCheckUp():
   try:
@@ -12,14 +18,21 @@ def startCheckUp():
     fileByte = request.files['data'].read()
 
     # Save this file to the local
-    with open('./static/img/last_taken/lastImg.jpg', 'wb') as file:
+    
+    img_name = str(datetime.timestamp(datetime.now())) + '.jpg'
+    img_to_save_path = os.path.join(
+      pathSave,
+      img_name
+    )
+    print(img_to_save_path)
+    with open(img_to_save_path, 'wb') as file:
         file.write(fileByte)
 
     # Load modal
-    model = tf.keras.models.load_model("unet (10).h5")
+    model = tf.keras.models.load_model("unet(10).h5")
 
     # Read image contain person
-    original = cv2.imread('./static/img/last_taken/lastImg.jpg')
+    original = cv2.imread(img_to_save_path)
     heightPersonImage, widthPersonImage, _ = original.shape   # Image: 3D array
 
     # Background
@@ -50,10 +63,28 @@ def startCheckUp():
 
     # Put logo in ROI and modify the main image
     background = cv2.add(img1_bg,img2_fg)
-    cv2.imwrite(os.path.join(pathSave , 'lastImg.jpg'), background)
+    cv2.imwrite(img_to_save_path, background)
+    img_path = os.path.join(
+      'static',
+      'img',
+      'taken',
+      img_name
+    )
 
-
-    return jsonify({ 'status': 'ok' })
+    return jsonify({ 'status': 'ok', 'img': img_path })
   except Exception as error:
     print(error)
     return jsonify({'status': 'failed'})
+
+def newest_image():
+  imgs = []
+  
+  for f in os.listdir(pathSave):
+      ext = os.path.splitext(f)[0]
+      imgs.append(ext)
+  imgs.sort(reverse=True)
+  
+  shit = imgs[0] + '.jpg'
+  shitty = 'static/img/taken/' + shit
+  print(shitty)
+  return shitty

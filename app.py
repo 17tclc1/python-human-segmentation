@@ -1,5 +1,5 @@
 from helper import *
-from routes.checkup import checkup
+from routes.checkup import checkup, newest_image
 #! After request and before response
 @app.after_request
 def add_header(response):
@@ -9,3 +9,4 @@ def add_header(response):
 app.register_blueprint(checkup)
 if __name__ == '__main__':
   app.run(host=server,use_reloader=False, debug=True, threaded=True)
+  # newest_image()

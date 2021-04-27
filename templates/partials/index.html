@@ -13,7 +13,7 @@
         <div id="info-section" class="border-bottom p-2 m-0 h-100">
           <h5 class="card-title font-weight-bold">Ảnh từ thu được từ server</h5>
           <p class="card-text font-weight-bold">Kết quả:</p>
-          <img id="attendance-image" src="./static/img/last_taken/lastImg.jpg"
+          <img id="attendance-image" src='{{ img }}'
           onerror="this.onerror=null; this.src='./static/img/last_taken/null.jpg'" class="card-img result-image">
         </div>
     </div>
@@ -35,6 +35,8 @@
 {% endblock %}
 {% block script %}
 <script>
+  const aaa = {{ img|tojson }};
+  console.log(aaa)
   const constraints = {
     video: true,
     audio: false,
@@ -73,7 +75,7 @@
         contentType: false,
         type: 'post',
         success: function(data) {
-          $('#attendance-image').attr('src', './static/img/last_taken/lastImg.jpg#'+ new Date().getTime());
+          $('#attendance-image').attr('src', `${data.img}#`+ new Date().getTime());
           if(data.status == "ok") {
             $('#current-attendance-status').text("Thành công");
           } 
